@@ -859,6 +859,7 @@ DECLARE_SOA_COLUMN(DebugMcRec, debugMcRec, int8_t);                 // debug fla
 enum DecayType { BplusToD0Pi = 0 };
 
 enum DecayTypeMc : uint8_t { BplusToD0PiToKPiPi = 0,
+                             BplusToD0KToKPiK,
                              PartlyRecoDecay,
                              OtherDecay,
                              NDecayTypeMc };
@@ -1042,7 +1043,8 @@ DECLARE_SOA_EXTENDED_TABLE_USER(HfCand3ProngExt, HfCand3ProngBase, "HFCAND3PEXT"
                                 hf_cand_3prong::Px, hf_cand_3prong::Py, hf_cand_3prong::Pz);
 
 using HfCand3Prong = HfCand3ProngExt;
-using HfCand3ProngWPid = soa::Join<HfCand3Prong, HfProng0PidPi, HfProng0PidPr, HfProng0PidKa, HfProng1PidPi, HfProng1PidPr, HfProng1PidKa, HfProng2PidPi, HfProng2PidPr, HfProng2PidKa>;
+using HfCand3ProngWPidPiKaPr = soa::Join<HfCand3Prong, HfProng0PidPi, HfProng0PidPr, HfProng0PidKa, HfProng1PidPi, HfProng1PidPr, HfProng1PidKa, HfProng2PidPi, HfProng2PidPr, HfProng2PidKa>;
+using HfCand3ProngWPidPiKa = soa::Join<HfCand3Prong, HfProng0PidPi, HfProng0PidKa, HfProng1PidPi, HfProng1PidKa, HfProng2PidPi, HfProng2PidKa>;
 
 DECLARE_SOA_TABLE(HfCand3ProngKF, "AOD", "HFCAND3PKF",
                   hf_cand_3prong::KfXError, hf_cand_3prong::KfYError, hf_cand_3prong::KfZError,
@@ -1733,8 +1735,6 @@ DECLARE_SOA_COLUMN(NSigTofPrFromLambda, nSigTofPrFromLambda, float);
 // MC matching result:
 DECLARE_SOA_COLUMN(FlagMcMatchRec, flagMcMatchRec, int8_t); // reconstruction level
 DECLARE_SOA_COLUMN(FlagMcMatchGen, flagMcMatchGen, int8_t); // generator level
-DECLARE_SOA_COLUMN(DebugMcRec, debugMcRec, int8_t);         // debug flag for mis-association reconstruction level
-DECLARE_SOA_COLUMN(DebugMcGen, debugMcGen, int8_t);
 DECLARE_SOA_COLUMN(OriginRec, originRec, int8_t);
 DECLARE_SOA_COLUMN(OriginGen, originGen, int8_t);
 // Dynamic columns
@@ -1821,14 +1821,12 @@ DECLARE_SOA_TABLE(HfCandXicKF, "AOD", "HFCANDXICKF",
 // table with results of reconstruction level MC matching
 DECLARE_SOA_TABLE(HfCandXicMcRec, "AOD", "HFCANDXICMCREC", //!
                   hf_cand_xic_to_xi_pi_pi::FlagMcMatchRec,
-                  hf_cand_xic_to_xi_pi_pi::DebugMcRec,
                   hf_cand_xic_to_xi_pi_pi::OriginRec);
-
 // table with results of generator level MC matching
 DECLARE_SOA_TABLE(HfCandXicMcGen, "AOD", "HFCANDXICMCGEN", //!
                   hf_cand_xic_to_xi_pi_pi::FlagMcMatchGen,
-                  hf_cand_xic_to_xi_pi_pi::DebugMcGen,
-                  hf_cand_xic_to_xi_pi_pi::OriginGen);
+                  hf_cand_xic_to_xi_pi_pi::OriginGen,
+                  hf_cand::PdgBhadMotherPart);
 
 // specific chic candidate properties
 namespace hf_cand_chic
@@ -1916,7 +1914,7 @@ DECLARE_SOA_COLUMN(DebugMcRec, debugMcRec, int8_t);                 // debug fla
 enum DecayType { LbToLcPi }; // move this to a dedicated cascade namespace in the future?
 
 enum DecayTypeMc : uint8_t { LbToLcPiToPKPiPi = 0,
-                             LbToLcPiToPKPiK,
+                             LbToLcKToPKPiK,
                              B0ToDplusPiToPiKPiPi,
                              PartlyRecoDecay,
                              OtherDecay,
@@ -1990,6 +1988,7 @@ enum DecayType { B0ToDPi };
 enum DecayTypeMc : uint8_t { B0ToDplusPiToPiKPiPi = 0,
                              B0ToDsPiToKKPiPi,
                              BsToDsPiToKKPiPi,
+                             B0ToDplusKToPiKPiK,
                              PartlyRecoDecay,
                              OtherDecay,
                              NDecayTypeMc };
@@ -2066,6 +2065,8 @@ enum DecayTypeMc : uint8_t { BsToDsPiToPhiPiPiToKKPiPi = 0, // Bs(bar) → Ds∓
                              BsToDsPiToK0starKPiToKKPiPi,   // Bs(bar) → Ds∓ π± → (K0* K∓) π± → (K- K+ π∓) π±
                              B0ToDsPiToPhiPiPiToKKPiPi,     // B0(bar) → Ds± π∓ → (Phi π±) π∓ → (K- K+ π±) π∓
                              B0ToDsPiToK0starKPiToKKPiPi,   // B0(bar) → Ds± π∓ → (K0* K±) π∓ → (K- K+ π±) π∓
+                             BsToDsKToPhiPiKToKKPiK,        // Bs(bar) → Ds± K∓ → (Phi π∓) K∓ → (K- K+ π±) K∓
+                             BsToDsKToK0starKKToKKPiK,      // Bs(bar) → Ds± K∓ → (K0* K±) K∓ → (K- K+ π±) K∓
                              PartlyRecoDecay,               // 4 final state particles have another common b-hadron ancestor
                              OtherDecay,
                              NDecayTypeMc }; // counter of differentiated MC decay types
